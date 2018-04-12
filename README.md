@@ -1,3 +1,2 @@
 # trivial
-Einfach nur Trivial
-Lorenz ist Faul.
+Einfach nur Trivial.

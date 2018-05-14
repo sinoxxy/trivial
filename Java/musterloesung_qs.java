@@ -1,4 +1,4 @@
-// Musterlösuing siehe: http://www.java-uni.de/index.php?Seite=86
+// Musterlösung siehe: http://www.java-uni.de/index.php?Seite=86
 
 public class QuickSort {
    public static void sortiere(int x[]) {

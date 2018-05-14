@@ -1,3 +1,5 @@
+// Musterlösuing siehe: http://www.java-uni.de/index.php?Seite=86
+
 public class QuickSort {
    public static void sortiere(int x[]) {
       qSort(x, 0, x.length-1);

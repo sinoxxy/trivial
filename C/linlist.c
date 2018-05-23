@@ -2,105 +2,106 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct lin_list{
-    char* payload;
-    struct lin_list* next;
-}LinListCell, *LinList_p;
 
-LinList_p LinListAllocCell(char* payload);
-void LinListFreeCell(LinList_p junk);
-void LinListFree(LinList_p* junk);
-LinList_p LinListInsertFirst(LinList_p* anchor, LinList_p newcell);
-LinList_p LinListExtractFirst(LinList_p* anchor);
+typedef struct linlist{
+    char *payload;
+    struct linlist *next;
+}linlist_cell, *linlist_p ;
+
+linlist_p anchor;
+linlist_p *anchor_adr = &anchor;
+
+void linlist_free_cell(linlist_p junk);
+void linlist_free(linlist_p *junk);
+linlist_p linlist_alloc_cell(char* payload);
+linlist_p linlist_insert_first(linlist_p *anchor, linlist_p newcell);
+linlist_p linlist_extract_first(linlist_p *anchor);
 
 
-int main(int argc, char* argv[]){
-    // init doublepointer and anchor
-    LinList_p* anch_adr = NULL;
-    LinList_p anchor = NULL;
-    LinList_p newanchor = NULL;
+int main() {
+    linlist_p i;
 
-    anch_adr = &anchor; 
-
-    FILE* in = stdin;
     char buffer[255];
-    if(argc > 2){
-        printf("not enough arguments");
-        exit(EXIT_FAILURE);
+    char reverse_buffer[255][255];
+    FILE *in = stdin;
+    printf("REVERSE INPUT\n");
+
+    while (fgets(buffer, 255, in))
+    {
+        linlist_p newcell = linlist_alloc_cell(buffer);
+        linlist_insert_first(anchor_adr,newcell);
     }
-    if(argc == 2){
-        in = fopen(argv[1],"r");
-        if(!in){
-            printf("cannot open file");
-            exit(EXIT_FAILURE);
-        }
+    printf("\nNORMAL OUTPUT\n");
+    int j = 0;
+    for (i = anchor; i != NULL; i = i->next)
+    {
+        fprintf(stdout, "%s", i->payload);
+        strcpy(reverse_buffer[j], i->payload);
+        j++;
+    }
+    printf("REVERSE OUTPUT\n");
+    j--;
+    for (j; j >= 0; j--)
+    {
+        fprintf(stdout, "%s", reverse_buffer[j]);
     }
 
-    for(int i = 0; i < 5; i++){
-       fgets(buffer,sizeof(buffer),in);
-       LinList_p newcell = LinListAllocCell(buffer);
-       anchor = LinListInsertFirst(&anchor,newcell);
-    }
-    
-    for(int i = 0; i < 3; i++){
-    printf("REVERSE PRINT\n");
-    while(anchor != NULL){
-        printf("%s",anchor->payload);
-        LinList_p tmp = LinListAllocCell(anchor->payload);
-        newanchor = LinListInsertFirst(&newanchor,tmp);
-        tmp = LinListExtractFirst(&anchor);
-        LinListFreeCell(tmp);
-    }
-
-    printf("NORMAL PRINT\n");
-    while(newanchor != NULL){
-        printf("%s",newanchor->payload);
-        LinList_p tmp = LinListAllocCell(newanchor->payload);
-        anchor = LinListInsertFirst(&anchor,tmp);
-        tmp = LinListExtractFirst(&newanchor);
-        LinListFreeCell(tmp);
-    }
-    //LinListFree(&newanchor);
-    //LinListFree(&anchor);
-    }
+    linlist_free(&anchor);
 }
 
-LinList_p LinListAllocCell(char* payload){
-    LinList_p newcell = malloc(sizeof(LinListCell));
-    char* value = strdup(payload);
-    
-    newcell->payload = value;
-    newcell->next = NULL;
-    return newcell;
-}
 
-void LinListFreeCell(LinList_p junk){
-    free(junk->payload);
+void linlist_free_cell(linlist_p junk)
+{
+    //free(junk->payload);
+    //free(junk->next);
     free(junk);
 }
 
-//not working
-void LinListFree(LinList_p* junk){
-    while((*junk)->next != NULL){
-        //printf("String: %s \n",(*junk)->payload);
-        LinList_p rest = *junk;
-        junk = &(*junk)->next;
-        free(rest);
+void linlist_free(linlist_p *junk){
+
+    if ((*junk)->next == NULL)
+    {
+        //printf("if: %s",(*junk)->payload);
+        free(*junk);
+        return;
     }
-    *junk = NULL;
+    else
+    {
+        //printf("else: %s",(*junk)->payload);
+        linlist_free(&((*junk)->next));
+        free(*junk);
+    }
 }
 
-LinList_p LinListInsertFirst(LinList_p* anchor, LinList_p newcell){
-    newcell->next = *anchor;
-   *anchor = newcell;
-   return *anchor;
+linlist_p linlist_alloc_cell(char* payload)
+{
+    linlist_p newcell = malloc(sizeof(linlist_p));
+    char *value;
+    //printf("%c\n",*payload);
+    newcell->payload = strdup(payload);
+    newcell->next = NULL;
+    return (newcell);
+
 }
-LinList_p LinListExtractFirst(LinList_p* anchor){
-    if(*anchor == NULL){
-       return NULL;
-   }
-   LinList_p ret = *anchor;
-   *anchor = ret->next;
-   ret->next = NULL;
-   return ret;
+linlist_p linlist_insert_first(linlist_p *anchor, linlist_p newcell)
+{
+    newcell->next = *anchor;
+    *anchor = newcell;
+    return(*anchor);
+
+}
+linlist_p linlist_extract_first(linlist_p *anchor)
+{
+    if (*anchor == NULL)
+    {
+        return NULL;
+    }
+    else
+    {
+        linlist_p *return_var;
+        return_var = anchor;
+        *anchor = (*anchor)->next;
+        return (*return_var);
+    }
+
 }

@@ -32,6 +32,8 @@ void print_lab(Lab_p mylab);
 
 int find_path(Lab_p mylab, int row_cur, int col_cur, long cost);
 
+int check_move(Lab_p mylab, int row, int col);
+
 int main(int argc, char *argv[]) {
     FILE *in = stdin;
 
@@ -53,7 +55,16 @@ int main(int argc, char *argv[]) {
 
     int outcome = find_path(mylab, mylab->startx, mylab->starty, 0);
     if (outcome == 1) {
-        printf("success");
+        printf("success\n");
+        printf("Treasure coord.: %i / %i\n", mylab->treasurex, mylab->treasurey);
+        int i;
+        int j;
+        for (i = 0; i < mylab->maxrow; i++) {
+            for (j = 0; j < 30; j++) {
+                printf("%ld ", mylab->costs[i][j]);
+            }
+            printf("\n");
+        }
     } else {
         printf("Failure");
     }
@@ -115,18 +126,14 @@ Lab_p init_lab(FILE *in) {
 
 int find_path(Lab_p mylab, int row_cur, int col_cur, long cost) {
 
-    mylab->costs[row_cur][col_cur] = cost;
-    if (mylab->lab[row_cur][col_cur] == 'X') {
-        return 1;
-        //mylab->treasurex = col_cur;
-        //mylab->treasurey = row_cur;
-        //return 1;
+    if (mylab->costs[row_cur][col_cur] > cost || mylab->costs[row_cur][col_cur] == 0) {
+        mylab->costs[row_cur][col_cur] = cost;
     }
-    system("clear");
-    printf("current pos: %i / %i; Value: %c\n", row_cur, col_cur, mylab->lab[row_cur][col_cur]);
-    // Abbruchbedingung
-    print_lab(mylab);
-
+    if (mylab->lab[row_cur][col_cur] == 'X') {
+        mylab->treasurex = col_cur;
+        mylab->treasurey = row_cur;
+        return 1;
+    }
     //wegpunkt setzen
     if (mylab->lab[row_cur][col_cur] == ' ') {
         mylab->lab[row_cur][col_cur] = '.';
@@ -135,42 +142,50 @@ int find_path(Lab_p mylab, int row_cur, int col_cur, long cost) {
         //printf("AUSRUFEZEICHEN: %c", mylab->lab[row_cur][col_cur]);
     }
 
+    system("clear");
+    printf("current pos: %i / %i; Value: %c\n", row_cur, col_cur, mylab->lab[row_cur][col_cur]);
+    // Abbruchbedingung
+    print_lab(mylab);
 
     //move right
-    if (mylab->lab[row_cur][col_cur + 1] != '#' && mylab->lab[row_cur][col_cur + 1] != '!') {
-        if (find_path(mylab, row_cur, col_cur + 1, cost + 1) == 1) {
+    if (check_move(mylab, row_cur, col_cur + 1)) {
+        if (find_path(mylab, row_cur, col_cur + 1, cost + 1)) {
             return 1;
         }
     }
     //move down
-    if (mylab->lab[row_cur + 1][col_cur] != '#' && mylab->lab[row_cur + 1][col_cur] != '!') {
-        if (find_path(mylab, row_cur + 1, col_cur, cost + 1) == 1) {
+    if (check_move(mylab, row_cur + 1, col_cur)) {
+        if (find_path(mylab, row_cur + 1, col_cur, cost + 1)) {
             return 1;
         }
     }
     //move up
-    if (mylab->lab[row_cur - 1][col_cur] != '#' && mylab->lab[row_cur - 1][col_cur] != '!') {
-        if (find_path(mylab, row_cur - 1, col_cur, cost + 1) == 1) {
+    if (check_move(mylab, row_cur - 1, col_cur)) {
+        if (find_path(mylab, row_cur - 1, col_cur, cost + 1)) {
             return 1;
         }
     }
     //move left
-    if (mylab->lab[row_cur][col_cur - 1] != '#' && mylab->lab[row_cur][col_cur - 1] != '!') {
-        if (find_path(mylab, row_cur, col_cur - 1, cost + 1) == 1) {
+    if (check_move(mylab, row_cur, col_cur - 1)) {
+        if (find_path(mylab, row_cur, col_cur - 1, cost + 1)) {
             return 1;
         }
     }
     return 0;
-    //move left if right doubled
-    /*
-    if (mylab->lab[row_cur][col_cur - 1] == '.' && mylab->lab[row_cur][col_cur + 1] == 99) {
-        find_path(mylab, row_cur, col_cur - 1);
-    }*/
 }
 
 void print_lab(Lab_p mylab) {
     int i;
     for (i = 0; i < mylab->maxrow; i++) {
         printf("%s", mylab->lab[i]);
+    }
+
+}
+
+int check_move(Lab_p mylab, int row, int col) {
+    if (mylab->lab[row][col] != '#' && mylab->lab[row][col] != '!') {
+        return 1;
+    } else {
+        return 0;
     }
 }
